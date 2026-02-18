@@ -16,4 +16,6 @@ app.get('/',(req,res)=>{
     res.send("this is home page")
 })
 
+app.use('/api/v1',userRoute)
+
 export  {app}
