@@ -1,4 +1,5 @@
 import { User } from "../models/user.models.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   try {
@@ -48,41 +49,112 @@ export const registerUser = async (req, res) => {
 };
 
 
-export const loginUser = async (req,res)=>{
-    try {
-        const {email,password}=req.body;
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        //check validation
-        if(!email || !password){
-            return res.status(400).json({
-                success:false,
-                message:"All fields are requireds"
-            })
-        }
-
-        //check if user already exits
-
-        const existUser= User.findOne({email});
-        if(existUser){
-            return res.status(400).json({
-                success:false,
-                message:"User already exists"
-            })
-        }
-        //check password
-
-        const isPassword= await existUser.isPasswordCorrect(password)
-        if(!isPassword){
-            return res.status(400).json({
-                success:false,
-                message:"Invalid Password"
-            })
-
-        }
-    } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Login Failed"
-        })
+    // basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
     }
-}
+    
+    
+
+    // check if user exists
+    const existUser = await User.findOne({ email });
+
+    if (!existUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // check password
+    const isPasswordCorrect = await existUser.isPasswordCorrect(password);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
+    }
+       
+    // generate tokens using instance methods
+    const accessToken = existUser.generateAccessToken();
+    const refreshToken = existUser.generateRefreshToken();
+
+
+    console.log(accessToken)
+    // save refresh token in DB
+    existUser.refreshToken = refreshToken;
+     
+    await existUser.save({ validateBeforeSave: false });
+
+
+  
+    const options={
+      httpOnly:true,
+      secure:true,
+      sameSite: "strict",   
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    }
+    return res.status(200)
+    .cookie("refreshtoken",refreshToken,options)
+    .json({
+      success: true,
+      message: "Login successful",
+      accessToken,
+      
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Login failed"
+    });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    // console.log("Logout request:", {
+    //   body: req.body,
+    //   cookies: req.cookies
+    // });
+
+    // token from body OR cookie
+    const refreshToken = req.body?.refreshToken || req.cookies?.refreshtoken;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    // try to remove refreshToken from DB (no error even if user not found)
+    await User.updateOne(
+      { refreshToken },
+      { $unset: { refreshToken: "" } }
+    );
+
+    // clear cookie and respond success
+    return res
+      .status(200)
+      .clearCookie("refreshtoken")
+      .json({
+        success: true,
+        message: "Logout successfully"
+      });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed"
+    });
+  }
+};
