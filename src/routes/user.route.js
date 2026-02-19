@@ -6,6 +6,8 @@ const router = express.Router()
 router.post('/register',registerUser)
 router.post('/login',loginUser);
 
+
+//secure routes
 router.post('/logout',logoutUser)
 router.post('/refresh-token',refreshAccessToken )
 
