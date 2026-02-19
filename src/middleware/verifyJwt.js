@@ -1,0 +1,33 @@
+import jwt from 'jsonwebtoken';
+
+import { User } from '../models/user.models';
+
+export const verifyJwt = async (req , res ,next)=>{
+    try {
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
+
+        if(!token){
+            return res.status(401).json({
+                success:false,
+                message:"Unauthorized request"
+            })
+        }
+        const decoded = jwt.verify(token , process.env.ACCESS_TOKEN);
+
+        const user = await findById(decoded.id).select("-password");
+
+        if(!user){
+            return res.status(400).json({
+                success:false,
+                message:"Invalid access token"
+            })
+        }
+        req.user = user;
+        next()
+    } catch (error) {
+        return res.status(401).json({
+            success:false,
+            message:"Invalid or expired Access token"
+        })
+    }
+}

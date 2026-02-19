@@ -158,3 +158,44 @@ export const logoutUser = async (req, res) => {
     });
   }
 };
+
+
+export const refreshAccessToken  = async (req , res)=>{
+  try {
+    const imcomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+
+    if(!imcomingRefreshToken){
+      return res.status(401).json({
+        success:false,
+        message:"Refresh token not found"
+      });
+    };
+
+    //verify refresh token
+    const decodedToken= jwt.verify(
+      imcomingRefreshToken,
+      process.env.REFRESH_TOKEN
+    );
+
+    const user = await User.findById(decodedToken._id);
+    if(!user){
+      return res.status(401).json({
+        success:false,
+        message:"Invalid refrseh token"
+      })
+    }
+
+    //generate new access toekn
+    const newAccessToken= user.generateAccessToken();
+    return res.status(200).json({
+      success:true,
+      accessToken:newAccessToken,
+    });
+
+  } catch (error) {
+     return res.status(401).json({
+      success:false,
+      message:"Invalid or expired refrseh token"
+     })
+  }
+}
