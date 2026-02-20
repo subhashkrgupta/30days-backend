@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 dotenv.config();
 import userRoute from './routes/user.route.js'
+import blogRoute from './routes/blog.route.js'
 
 
 const app = express();
@@ -17,6 +18,7 @@ app.get('/',(req,res)=>{
     res.send("this is home page")
 })
 
-app.use('/api/v1',userRoute)
+app.use('/api/v1',userRoute);
+app.use('/api/v1/blogs',blogRoute)
 
 export  {app}
