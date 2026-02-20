@@ -5,7 +5,7 @@ import { createBlog, deleteBlog, getAllBlog, updateBlog } from '../controllers/b
 
 const router = express.Router();
 
-//publoc route
+//public route
 router.get('/',getAllBlog)
 
 //protected route
