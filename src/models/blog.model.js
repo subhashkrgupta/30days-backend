@@ -7,19 +7,14 @@ export const blogSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-    },
+   
     content: {
       type: String,
       required: true,
     },
-    thumbnail: {
-      type: String,
-    },
+    // thumbnail: {
+    //   type: String,
+    // },
     authour: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
