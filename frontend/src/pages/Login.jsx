@@ -27,14 +27,17 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/v1/users/login', formData, {
+      const response = await axios.post('/api/v1/login', formData, {
         withCredentials: true,
       });
 
       const accessToken = response?.data?.accessToken;
-      if (accessToken) localStorage.setItem('accessToken', accessToken);
-
-      navigate('/');
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken);
+        navigate('/dashboard', { replace: true });
+      } else {
+        setError('Login successful but access token missing.');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
