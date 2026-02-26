@@ -10,12 +10,12 @@ const MainLayout = () => {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="">
       {/* Agar AuthPage nahi hai, tabhi NavBar dikhao */}
-      {!isAuthPage && <NavBar />}
+       <NavBar />
 
     
-      <main className="grow">
+      <main className="grow mt-18 flex flex-col min-h-screen">
         <Outlet />
       </main>
 

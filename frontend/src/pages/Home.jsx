@@ -8,7 +8,7 @@ const Home = () => {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard');
     }
   }, [navigate]);
   const blogs = [
