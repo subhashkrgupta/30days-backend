@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Menu, X, ChevronRight, UserCircle2, ChevronDown } from "lucide-react";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
 
 
@@ -16,6 +19,20 @@ const NavBar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check auth state from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    // clear token on client
+    localStorage.removeItem("accessToken");
+    setIsLoggedIn(false);
+    setUserMenuOpen(false);
+    navigate("/login");
+  };
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -62,19 +79,68 @@ const NavBar = () => {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              to="/login"
-              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/register"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-md hover:shadow-indigo-500/20"
-            >
-              Get Started
-            </Link>
+          <div className="hidden md:flex items-center gap-4 relative">
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  to="/login"
+                  className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-md hover:shadow-indigo-500/20"
+                >
+                  Get Started
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => setUserMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-1 text-gray-300 hover:text-white text-sm font-medium focus:outline-none"
+                >
+                  <UserCircle2 size={22} />
+                  <ChevronDown size={16} />
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all shadow-md hover:shadow-red-500/20"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+
+            {isLoggedIn && userMenuOpen && (
+              <div className="absolute right-0 top-10 mt-2 w-40 bg-gray-900 border border-gray-700 rounded-lg shadow-lg py-2 text-sm z-50">
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    navigate("/dashboard");
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-800"
+                >
+                  My Posts
+                </button>
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    navigate("/dashboard");
+                  }}
+                  className="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-800"
+                >
+                  Settings
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -115,18 +181,41 @@ const NavBar = () => {
             <div className="h-px bg-gray-800 my-4 mx-4"></div>
             
             <div className="flex flex-col gap-3 px-4">
-              <Link
-                to="/login"
-                className="w-full text-center text-gray-300 hover:text-white font-medium py-2"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/register"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
-              >
-                Get Started <ChevronRight size={16} />
-              </Link>
+              {!isLoggedIn ? (
+                <>
+                  <Link
+                    to="/login"
+                    className="w-full text-center text-gray-300 hover:text-white font-medium py-2"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                  >
+                    Get Started <ChevronRight size={16} />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="w-full text-center text-gray-300 hover:text-white font-medium py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white text-center py-3 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                  >
+                    Logout
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
