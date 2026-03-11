@@ -15,7 +15,7 @@ export const blogSchema = new mongoose.Schema(
     // thumbnail: {
     //   type: String,
     // },
-    authour: {
+    author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -30,7 +30,7 @@ export const blogSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ["draft", "Published"],
+      enum: ["draft", "published"],
       default: "draft",
     },
     view: {

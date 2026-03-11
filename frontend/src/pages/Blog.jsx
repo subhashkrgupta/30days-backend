@@ -1,82 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { Search, Calendar, User, ArrowRight, Clock, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Blog = () => {
+  const navigate = useNavigate();
   // State for search and category filtering
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [posts, setPosts] = useState([]);
 
-  // Mock Data
-  const allPosts = [
-    {
-      id: 1,
-      title: "Mastering React Hooks in 2026",
-      excerpt: "A deep dive into useEffect, useMemo, and custom hooks to write cleaner code.",
-      category: "React",
-      author: "Sarah Jenkins",
-      date: "Feb 10, 2026",
-      readTime: "8 min",
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      title: "The Future of CSS: Tailwind vs. CSS-in-JS",
-      excerpt: "Comparing utility classes with styled-components. Which one wins in performance?",
-      category: "Design",
-      author: "Mike Ross",
-      date: "Feb 08, 2026",
-      readTime: "6 min",
-      image: "https://images.unsplash.com/photo-1507721999472-8ed443899201?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Building Scalable APIs with Node.js",
-      excerpt: "Best practices for error handling, validation, and architecture in Express apps.",
-      category: "Backend",
-      author: "Alex Chen",
-      date: "Feb 05, 2026",
-      readTime: "12 min",
-      image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=2074&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Next.js 15: What's New?",
-      excerpt: "Exploring server actions, partial prerendering, and the new compiler improvements.",
-      category: "React",
-      author: "Sarah Jenkins",
-      date: "Jan 28, 2026",
-      readTime: "10 min",
-      image: "https://images.unsplash.com/photo-1618477247222-ac59e276211f?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 5,
-      title: "DevOps for Frontend Developers",
-      excerpt: "Understanding CI/CD pipelines, Docker, and AWS basics for React developers.",
-      category: "DevOps",
-      author: "John Doe",
-      date: "Jan 20, 2026",
-      readTime: "15 min",
-      image: "https://images.unsplash.com/photo-1667372393119-3866372c964c?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 6,
-      title: "Ace Your Coding Interview",
-      excerpt: "Top 50 data structure and algorithm questions asked by FAANG companies.",
-      category: "Career",
-      author: "Emily White",
-      date: "Jan 15, 2026",
-      readTime: "20 min",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop"
-    },
-  ];
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("/api/v1/blogs", { withCredentials: true });
+        if (!mounted) return;
+        setPosts(res.data?.blogs || []);
+      } catch (err) {
+        if (!mounted) return;
+        setError(err.response?.data?.message || "Failed to fetch blogs");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const categories = ["All", "React", "Backend", "Design", "DevOps", "Career"];
+  const categories = useMemo(() => {
+    const set = new Set(["All"]);
+    posts.forEach((p) => {
+      if (p?.category) set.add(p.category);
+    });
+    return Array.from(set);
+  }, [posts]);
 
   // Filter Logic
-  const filteredPosts = allPosts.filter(post => {
+  const filteredPosts = posts.filter((post) => {
+    const excerpt = (post?.content || "").slice(0, 140);
     const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      (post.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -129,23 +100,35 @@ const Blog = () => {
         </div>
 
         {/* Blog Grid */}
-        {filteredPosts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600">Loading blogs...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        ) : filteredPosts.length > 0 ? (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPosts.map((post) => (
               <article
-                key={post.id}
-                className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full hover:-translate-y-1"
+                key={post._id}
+                onClick={() => navigate(`/blog/${post._id}`)}
+                className="group cursor-pointer bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 flex flex-col h-full hover:-translate-y-1"
               >
-                {/* Image Container */}
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-indigo-700 uppercase tracking-wider shadow-sm">
-                    {post.category}
+                {/* Header */}
+                <div className="relative p-6 bg-gradient-to-br from-gray-900 to-slate-800 text-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-xs font-bold uppercase tracking-wider text-indigo-200">
+                      {post.category || "General"}
+                    </div>
+                    <div className="text-xs text-gray-200">
+                      {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ""}
+                    </div>
                   </div>
+                  <h2 className="mt-3 text-xl font-extrabold leading-snug">
+                    {post.title}
+                  </h2>
                 </div>
 
                 {/* Content */}
@@ -153,18 +136,17 @@ const Blog = () => {
                   {/* Meta Data */}
                   <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> {post.date}
+                      <Calendar className="w-3 h-3" />{" "}
+                      {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "—"}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {post.readTime}
+                      <Clock className="w-3 h-3" />{" "}
+                      {Math.max(1, Math.ceil((post.content || "").split(/\s+/).length / 200))} min
                     </span>
                   </div>
 
-                  <h2 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-indigo-600 transition-colors">
-                    {post.title}
-                  </h2>
                   <p className="text-gray-600 mb-6 line-clamp-3 text-sm leading-relaxed">
-                    {post.excerpt}
+                    {(post.content || "").slice(0, 160)}{post.content?.length > 160 ? "..." : ""}
                   </p>
 
                   {/* Footer: Author & Read More */}
@@ -173,7 +155,9 @@ const Blog = () => {
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
                         <User className="w-4 h-4" />
                       </div>
-                      <span className="text-sm font-medium text-gray-700">{post.author}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {post.author?.userName || "Unknown"}
+                      </span>
                     </div>
                     <button className="text-indigo-600 font-semibold text-sm hover:underline flex items-center gap-1">
                       Read <ArrowRight className="w-4 h-4" />

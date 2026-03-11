@@ -2,7 +2,9 @@ import { Blog } from "../models/blog.model.js";
 
 export const getAllBlog = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 });
+    const blogs = await Blog.find()
+      .populate("author", "userName email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -20,9 +22,36 @@ export const getAllBlog = async (req, res) => {
   }
 };
 
+export const getBlogById = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id).populate(
+      "author",
+      "userName email"
+    );
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      blog,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch blog",
+      error: error.message,
+    });
+  }
+};
+
 export const createBlog = async (req, res) => {
   try {
-    const { title, author, content, category } = req.body;
+    const { title, content, category } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({
@@ -31,10 +60,17 @@ export const createBlog = async (req, res) => {
       });
     }
 
+    if (!req.user?._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
+
     const blog = await Blog.create({
       title,
       content,
-      author,
+      author: req.user._id,
       category
     });
 

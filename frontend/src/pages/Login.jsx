@@ -34,6 +34,7 @@ const Login = () => {
       const accessToken = response?.data?.accessToken;
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
+        window.dispatchEvent(new Event('auth:changed'));
         navigate('/dashboard', { replace: true });
       } else {
         setError('Login successful but access token missing.');

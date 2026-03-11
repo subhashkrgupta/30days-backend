@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronRight, UserCircle2, ChevronDown } from "lucide-react";
+import { getValidAccessToken } from "../utils/auth";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,8 +23,21 @@ const NavBar = () => {
 
   // Check auth state from localStorage
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = getValidAccessToken();
     setIsLoggedIn(!!token);
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      const token = getValidAccessToken();
+      setIsLoggedIn(!!token);
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener("auth:changed", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("auth:changed", sync);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -31,6 +45,7 @@ const NavBar = () => {
     localStorage.removeItem("accessToken");
     setIsLoggedIn(false);
     setUserMenuOpen(false);
+    window.dispatchEvent(new Event("auth:changed"));
     navigate("/login");
   };
 
