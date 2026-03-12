@@ -27,7 +27,7 @@ const Dashboard = () => {
         const currentUser = userResp.data.user;
         setUser(currentUser);
 
-        const postsResp = await axios.get("/api/v1/blogs/my-posts", {
+        const postsResp = await axios.get("/api/v1/blogs", {
           headers: authHeaders,
           withCredentials: true,
         });
@@ -66,12 +66,12 @@ const Dashboard = () => {
   const lastPostDate = posts.length > 0 ? new Date(posts[0].createdAt) : null;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-6xl mx-auto mt-10">
+    <div className="min-h-screen bg-gray-100 mt-5">
+      <div className="max-w-6xl mx-auto mt-22">
         <header className="bg-white shadow-sm px-8 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
-              Welcome back {user?.userName || "User"} 👋
+              Welcome back {user?.userName || "User"} 
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               You have posted <strong>{userPostCount}</strong> blogs.

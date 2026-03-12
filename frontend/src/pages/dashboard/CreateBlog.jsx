@@ -56,7 +56,7 @@ const CreateBlog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-24 px-4">
+    <div className="min-h-screen bg-gray-100 flex mt-5 justify-center items-start pt-24 px-4">
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
           Create New Blog

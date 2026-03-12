@@ -15,7 +15,7 @@ const MainLayout = () => {
        <NavBar />
 
     
-      <main className="grow mt-18 flex flex-col min-h-screen">
+      <main className="grow  flex flex-col min-h-screen">
         <Outlet />
       </main>
 
