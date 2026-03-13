@@ -53,8 +53,10 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href="https://www.linkedin.com/in/01subhashkumar/"
                 className="text-gray-400 hover:text-white transition-colors duration-300 bg-gray-800 p-2 rounded-full hover:bg-blue-600"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Linkedin size={20} />
               </a>
