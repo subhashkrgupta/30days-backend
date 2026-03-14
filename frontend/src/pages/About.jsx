@@ -42,7 +42,7 @@ const About = () => {
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight dark:text-white">
             Where code meets <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
               Clear Perspective.
             </span>
           </h1>
