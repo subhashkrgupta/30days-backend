@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import NavBar from "../component/NavBar";
-import Footer from "../component/footer";
 import ChatBot from "../component/ChatBot";
+import Footer from "../component/Footer";
 
 
 const MainLayout = () => {
