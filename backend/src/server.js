@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: ["http://localhost:5173", process.env.FRONTEND_URL],
   credentials: true
 }));
 
@@ -25,5 +25,9 @@ app.get('/',(req,res)=>{
 app.use('/api/v1',userRoute);
 app.use('/api/v1/blogs',blogRoute)
 app.use('/api/v1',aichatRoute)
+
+app.get('/health', (req, res) => {
+  res.status(200).send('Server is healthy');
+});
 
 export  {app}
