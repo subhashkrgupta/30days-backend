@@ -36,7 +36,7 @@ const useAuthStore = create((set) => ({
     });
 
     try {
-        console.log("LOGIN DATA FROM ZUSTAND : ", data)
+        // console.log("LOGIN DATA FROM ZUSTAND : ", data)
       const response = await axiosInstance.post("/login", data);
 
       const { user, accessToken } = response.data;
@@ -100,6 +100,40 @@ const useAuthStore = create((set) => ({
       throw error;
     } finally {
       set({
+        isLoading: false,
+      });
+    }
+  },
+
+  checkAuth: async() => {
+    set({
+      isLoading: true,
+      isError: false,
+      error: null,
+    });
+
+    try {
+        const response = axiosInstance.get("/me")
+        const {user, accessToken } = response.data;
+        set({
+            user: user || null,
+            accessToken: accessToken || null,
+            isAuthenticated: true,
+            isError: false,
+            error: null,
+        });
+    } catch (error) {
+        const message =
+        error.response?.data?.message || "Unauthorized User";
+
+      set({
+        isError: true,
+        error: message,
+      });
+
+      throw error;
+    }finally {
+        set({
         isLoading: false,
       });
     }
