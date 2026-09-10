@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/authStore';
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const {isLoading, error, login} = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -23,26 +22,12 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
     try {
-      const response = await axios.post('/api/v1/login', formData, {
-        withCredentials: true,
-      });
-
-      const accessToken = response?.data?.accessToken;
-      if (accessToken) {
-        localStorage.setItem('accessToken', accessToken);
-        window.dispatchEvent(new Event('auth:changed'));
-        navigate('/dashboard', { replace: true });
-      } else {
-        setError('Login successful but access token missing.');
-      }
+     await login(formData)
+     navigate("/dashboard")
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-    } finally {
-      setLoading(false);
+      console.log(err)
     }
   };
 
@@ -150,10 +135,10 @@ const Login = () => {
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:-translate-y-0.5"
               >
-                {loading ? 'Signing in...' : 'Sign in'} <LogIn className="h-4 w-4" />
+                {isLoading ? 'Signing in...' : 'Sign in'} <LogIn className="h-4 w-4" />
               </button>
             </div>
           </form>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronRight, UserCircle2, ChevronDown } from "lucide-react";
 import { getValidAccessToken } from "../utils/auth";
+import useAuthStore from "../store/authStore";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +10,7 @@ const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const {logout} = useAuthStore();
 
   // Handle scroll effect
   useEffect(() => {
@@ -26,24 +28,9 @@ const NavBar = () => {
     setIsLoggedIn(!!token);
   }, []);
 
-  useEffect(() => {
-    const sync = () => {
-      const token = getValidAccessToken();
-      setIsLoggedIn(!!token);
-    };
-    window.addEventListener("storage", sync);
-    window.addEventListener("auth:changed", sync);
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("auth:changed", sync);
-    };
-  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    setIsLoggedIn(false);
-    setUserMenuOpen(false);
-    window.dispatchEvent(new Event("auth:changed"));
+  const handleLogout = async () => {
+    await logout()
     navigate("/login");
   };
 

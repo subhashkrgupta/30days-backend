@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
   User,
   Mail,
@@ -11,11 +10,13 @@ import {
   Phone,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
 
 const Register = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const {isLoading, error, register } = useAuthStore()
 
   const [formData, setFormData] = useState({
     userName: "",
@@ -24,8 +25,6 @@ const Register = () => {
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // Handle Input Change
   const handleChange = (e) => {
@@ -38,25 +37,13 @@ const Register = () => {
   // Handle Submit
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
     try {
-      const response = await axios.post(
-        "/api/v1/register",
-        formData,
-        { withCredentials: true }
-      );
-
-      alert(response.data.message);
+      await register(formData)
       navigate("/login");
 
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Registration failed"
-      );
-    } finally {
-      setLoading(false);
+     console.log(err)
     }
   };
 
@@ -183,10 +170,10 @@ const Register = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:-translate-y-0.5"
             >
-              {loading ? "Creating..." : "Create Account"} <UserPlus className="h-4 w-4" />
+              {isLoading ? "Creating..." : "Create Account"} <UserPlus className="h-4 w-4" />
             </button>
           </form>
 
